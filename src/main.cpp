@@ -2,13 +2,14 @@
 #include <ESP8266WiFi.h>
 #include <WebSocketsClient.h>
 #include "HX711.h"
+#include "ArduinoJson.h"
 
 // Replace with your network credentials
 const char *ssid = "miért nézed egyáltalán ezt?";
 const char *password = "nincs leak";
 
 // WebSocket server details
-const char *websockets_server_host = "192.168.0.211";
+const char *websockets_server_host = "192.168.31.130";
 const uint16_t websockets_server_port = 12345; // Make sure your server is listening on this port
 const char *websockets_server_path = "/";    // WebSocket path if needed
 
@@ -18,7 +19,7 @@ WebSocketsClient webSocket;
 // create scale object
 HX711 scale;
 
-int GCK_pin = D1;
+int GCK_pin = D0;
 int DATA_pin = D2;
 
 // Callback function to handle WebSocket events
