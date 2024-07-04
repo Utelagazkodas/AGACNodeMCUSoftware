@@ -1,33 +1,31 @@
 import * as express from "express"
 import * as logger from "./logger.js"
 import * as fs from "fs"
-import { redirects, settings } from "./index.js"
-import { validVariable } from "./format.js"
+
 
 const loaded = []
 
 export function get(req: express.Request, res: express.Response) {
-    var redirect: { cache: boolean; fileLocation: string; contentType : string;} = redirects.get(req.url)
-    if(validVariable(redirect)){
-        if(validVariable(redirect.contentType)){
-            res.setHeader("Content-Type", redirect.contentType)
-        }
-
-        sendFile(redirect.fileLocation, req, res, redirect.cache)
-        return
+    if(fs.existsSync("Frontend/docs/" + req.url)){
+        sendFile("Frontend/docs/" + req.url, req,res)
     }
-
-    sendFile(settings.errorPage.path, req, res, settings.errorPage.cache)
+    else {
+        res.send("error404")
+    }
 }
 
 export function started() {
     logger.log("Webserver Sucesfully started")
 }
 
-function sendFile(path: string, req: express.Request, res: express.Response, stayLoaded: boolean = true): void {
+function sendFile(path: string, req: express.Request, res: express.Response): void {
+
+    if(req.url.slice(req.url.length - 3) == ".js"){
+        res.setHeader('Content-Type', 'application/javascript'); 
+    }
 
     //checks if the path they are trying to send has already been loaded
-    if (loaded[path] && stayLoaded) {
+    if (loaded[path]) {
         res.write(loaded[path])
         res.end()
         return

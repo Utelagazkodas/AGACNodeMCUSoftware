@@ -16,16 +16,11 @@ export const settings: {
     port: number,
     webPort: number,
     tokenCharset: string,
-    sendDataBack: boolean,
     multipleTypesInTable: boolean,
     messageLenghtMaximum: number,
     writeToken: boolean,
     sendVerificationBack: boolean,
     chunkInterval: number,
-    saveTablesToFile: boolean,
-    webServer: boolean,
-    pages: { redirects: string[], path: string, cache: boolean, contentType : string }[],
-    errorPage: { path: string, cache : boolean},
 } = JSON.parse(removeComments(rawData))
 
 // PORT
@@ -75,32 +70,18 @@ wss.on("connection", connection)
 
 // varaibles for webserver
 export var app: express.Express = null
-export var redirects: Map<string, {cache : boolean, fileLocation : string, contentType : string}> = null
 
-if (settings.webServer) {
+
     // Initializes the web server
     app = express.default()
-    redirects = new Map<string, {cache : boolean, fileLocation : string, contentType: string}>()
 
     app.get("*", get)
     app.listen(webServerPort, started)
 
-    // Initializes redirects
-    settings.pages.forEach(page => {
-        page.redirects.forEach(redirect => {
-            redirects.set(redirect, {cache : page.cache, fileLocation : page.path, contentType : page.contentType})
-        });
-    });
-}
 
-// File saving
-if (settings.saveTablesToFile) {
+
     // if the server closes or anything happens writes the tables to a file
     wss.on("error", writeTables)
     wss.on("close", writeTables)
     process.on("SIGHUP", writeTables)
     ON_DEATH(writeTables)
-}
-else {
-    log("!! SAVING FILES IS TURNED OFF !!")
-}
