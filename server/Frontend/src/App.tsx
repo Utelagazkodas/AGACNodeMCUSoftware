@@ -1,18 +1,17 @@
 import { useEffect } from "react"
 import Button from "./Button"
-import Counter from "./Counter"
 
 function App() :JSX.Element {
 
   useEffect(()=>{
-    document.title = "Tase me"
+    document.title = "Agac Launch interface :>"
   })
 
   return (
     <>
 
 
-      <div className="flex flex-col justify-center min-h-screen place-items-center bg-slate-400"><Button/> <Counter/></div>
+      <div className="flex flex-col justify-center min-h-screen place-items-center bg-slate-400"><Button/> </div>
       
 
     </>
