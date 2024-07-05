@@ -66,7 +66,8 @@ export function connection(ws: webSocket.WebSocket, req: ClientRequest) {
                     table: string,
                     value: unknown,
                     values: [unknown],
-                    entries: [{ table: string, value: unknown, values: [unknown] }]
+                    entries: [{ table: string, value: unknown, values: [unknown] }],
+                    instant : boolean
                 } = JSON.parse(stringified)
 
                 // handles all the different cases
@@ -101,16 +102,16 @@ export function connection(ws: webSocket.WebSocket, req: ClientRequest) {
                     })
                 } else {
                     // different errors
-                    if (newEntrie.entries.length > 0) {
-                        throw "entries has to have an element"
-                    } else {
-                        throw "entries or table has to have a value"
-                    }
+                    throw "entries or table has to have a value"
+                    
                 }
 
 
                 // starts the chunk interval
-                if (chunkInterval == null && settings.chunkInterval != 0) {
+                if (newEntrie.instant){
+                    send()
+                }
+                else if (chunkInterval == null && settings.chunkInterval != 0) {
                     chunkInterval = setInterval(send, settings.chunkInterval * 1000)
                 } else if (settings.chunkInterval == 0) {
                     send()

@@ -6,8 +6,14 @@ import * as fs from "fs"
 const loaded = []
 
 export function get(req: express.Request, res: express.Response) {
-    if(fs.existsSync("Frontend/docs/" + req.url)){
-        sendFile("Frontend/docs/" + req.url, req,res)
+    if (req.url == "/" || req.url == ""){
+        if(fs.existsSync("docs/index.html")){
+            sendFile("docs/index.html", req, res)
+        }
+    }
+
+    else if(fs.existsSync("docs/" + req.url)){
+        sendFile("docs/" + req.url, req,res)
     }
     else {
         res.send("error404")
