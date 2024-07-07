@@ -1,14 +1,29 @@
-import {  useState } from "react"
-import { socket } from "./websocket"
+import {  useEffect, useMemo, useState } from "react"
+import { socket, tables } from "./websocket"
 
 export let setLaunchedGlobal : Function[] = []
 
 
 function Button() : JSX.Element{
 
-    const [launched, setLaunched] = useState<boolean | undefined>(undefined)
-
+    const [launched, setLaunched] = useState<boolean | undefined>( undefined)
     setLaunchedGlobal.push(setLaunched)
+
+
+
+    
+        useEffect(()=>{
+            let t = tables.get("launched")
+        if(t){
+            let temp = t[t.length-1]
+        
+            if(typeof(temp) == "boolean"){
+                setLaunched(temp)
+            }      
+        }
+    
+        }, [])
+
 
     return (
         <div className="flex justify-center h-40">
@@ -18,10 +33,11 @@ function Button() : JSX.Element{
 }
 
 function shouldButtonBePressable(launched : boolean | undefined) : boolean{
-    if(launched == undefined || launched == true){
-        return false
+    
+    if(!launched){
+        return true
     }
-    return true
+    return false
 }
 
 
