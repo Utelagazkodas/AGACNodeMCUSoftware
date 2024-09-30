@@ -41,12 +41,12 @@ function App() :JSX.Element {
   else if(authenticated && !launched){
     return (
       <>
-        <div className="flex flex-col justify-center min-h-screen place-items-center bg-slate-400"><Button/> </div>
+        <div className="flex flex-col justify-center min-h-screen place-items-center bg-slate-400"> launch<Button/> </div>
   
       </>
     )
   }
-  else {
+  else{
     return (
       <>
         <div className="flex flex-col justify-center min-h-screen place-items-center bg-slate-400"><Live/> </div>
