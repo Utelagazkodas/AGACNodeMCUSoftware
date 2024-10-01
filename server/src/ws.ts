@@ -11,6 +11,8 @@ var chunkInterval: NodeJS.Timeout = null
 var sendOut: Map<string, unknown[]> = new Map<string, unknown[]>()
 var snapShot: Map<string, unknown[]> = new Map<string, unknown[]>()
 
+var amountOfDatas : number = undefined
+
 export function connection(ws: webSocket.WebSocket, req: ClientRequest) {
     log("Someone Connected to websocket", ["with ip: " + req.socket.remoteAddress])
 
@@ -48,9 +50,27 @@ export function connection(ws: webSocket.WebSocket, req: ClientRequest) {
         }
         // AUTHENTIACETED SENDS MESSAGE
         else if (authenticated == true) {
+            var stringified = data.toString()
+
+            if (stringified == "ready"){
+                addData("launched", false)
+                send()
+                return
+            }
+            else if(stringified == "launch"){
+                addData("launched", undefined)
+                send()
+                return
+                
+            }
+            else if(stringified == "launched"){
+                addData("launched", true)
+                send()
+                return
+            }
+
 
             //if the message is too long terminates it
-            var stringified = data.toString()
             if (stringified.length > settings.messageLenghtMaximum) {
                 logError(["Message too long"])
                 ws.terminate()
@@ -63,55 +83,74 @@ export function connection(ws: webSocket.WebSocket, req: ClientRequest) {
             // checks if the thing sent is valid json
             try {
                 var newEntrie: {
-                    table: string,
-                    value: unknown,
-                    values: [unknown],
                     entries: [{ table: string, value: unknown, values: [unknown] }],
-                    instant : boolean
                 } = JSON.parse(stringified)
 
-                // handles all the different cases
-                if (validVariable(newEntrie.table)) {
-                    // handles errors
-                    if (validVariable(newEntrie.entries)) {
-                        throw "you cant have table and entries"
-                    }
-                    //checks if value exists but values doesnt
-                    else if (validVariable(newEntrie.value) && !validVariable(newEntrie.values)) {
-                        addData(newEntrie.table, newEntrie.value)
-                    }
-                    //checks if values exists but value doesnt
-                    else if (!validVariable(newEntrie.value) && validVariable(newEntrie.values)) {
-                        addData(newEntrie.table, newEntrie.values, true)
-                    } else {
-                        throw "you cant have value and values both or neither"
+                let hasTimeStamp : boolean = false;
+                let SameLenght : number = undefined
+
+                
+
+                if (validVariable(newEntrie.entries) || newEntrie.entries.length > 1) {
+                    if(newEntrie.entries.length != amountOfDatas && amountOfDatas != undefined && settings.sameDataEveryTime){
+                        throw "you must have the exact same tables every time"
                     }
 
-                } else if (validVariable(newEntrie.entries) || newEntrie.entries.length > 0) {
+
                     newEntrie.entries.forEach((entrie: { table: string, value: unknown, values: [unknown] }) => {
+                        if(entrie.table == "launched"){
+                            throw "launched table is reserved"
+                        }
+                        else if(entrie.table == "timestamp"){
+                            hasTimeStamp = true
+                        }
+
+
+
+
                         //checks if value exists but values doesnt
                         if (validVariable(entrie.value) && !validVariable(entrie.values)) {
                             addData(entrie.table, entrie.value)
+
+                            if(SameLenght == undefined || !settings.necesarryTimeStampTable){
+                                SameLenght = 1
+                            }
+                            else if(SameLenght != 1){
+                                throw "all values for all tables have to be the same length"
+                            }
                         }
                         //checks if values exists but value doesnt 
                         else if (!validVariable(entrie.value) && validVariable(entrie.values)) {
                             addData(entrie.table, entrie.values, true)
+
+                            if(SameLenght == undefined || !settings.necesarryTimeStampTable){
+                                SameLenght = entrie.values.length
+                            }
+                            else if(SameLenght != entrie.values.length){
+                                throw "all values for all tables have to be the same length"
+                            }
+
                         } else {
                             throw "you cant have value and values both or neither in entries"
                         }
                     })
                 } else {
                     // different errors
-                    throw "entries or table has to have a value"
+                    throw "entries or table has to have more than one (timestamp) value"
                     
+                }
+
+                if(settings.sameDataEveryTime && amountOfDatas == undefined){
+                    amountOfDatas = newEntrie.entries.length
+                }
+
+                if(!hasTimeStamp && settings.necesarryTimeStampTable){
+                    throw "a timestamp table is necesarry"
                 }
 
 
                 // starts the chunk interval
-                if (newEntrie.instant){
-                    send()
-                }
-                else if (chunkInterval == null && settings.chunkInterval != 0) {
+                if (chunkInterval == null && settings.chunkInterval != 0) {
                     chunkInterval = setInterval(send, settings.chunkInterval * 1000)
                 } else if (settings.chunkInterval == 0) {
                     send()
@@ -175,6 +214,11 @@ function addData(table: string, value: any, isArray: boolean = false) {
     }
 
     if (tables.has(table) == false) {
+        if (settings.sameDataEveryTime && amountOfDatas != undefined){
+            throw "you cant create new datas after its established"
+        }
+
+
         // checks for illegal charachters
         if (table != formatText(table)) {
             throw "illegal charachter in table"
@@ -191,7 +235,7 @@ function addData(table: string, value: any, isArray: boolean = false) {
 
     var values = tables.get(table)
 
-    if (typeof values[0] == typeof value || settings.multipleTypesInTable) {
+    if (typeof values[0] == typeof value || settings.multipleTypesInTable || table == "launched") {
         // adds new value to the table
         values[values.length] = value
         tables.set(table, values)

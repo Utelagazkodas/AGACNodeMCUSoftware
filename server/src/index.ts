@@ -21,6 +21,8 @@ export const settings: {
     writeToken: boolean,
     sendVerificationBack: boolean,
     chunkInterval: number,
+    necesarryTimeStampTable : boolean,
+    sameDataEveryTime : boolean
 } = JSON.parse(removeComments(rawData))
 
 // PORT

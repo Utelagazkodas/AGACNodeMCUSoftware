@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import Button, { setLaunchedGlobal } from "./Button"
 import { Live } from "./Live"
 import { Connect } from "./Connect"
+import { globLaunched } from "./main"
 
 export let setConnectedGlobal :Function = ()=>{
   throw "setConnectedGlobal has not been set yet"
@@ -19,7 +20,7 @@ function App() :JSX.Element {
 
   const [connected, setConnected] = useState(false)
   const [authenticated, setAuthenticated] = useState(false)
-  const [launched, setLaunched] = useState<boolean | undefined>(undefined)
+  const [launched, setLaunched] = useState<boolean | undefined>(globLaunched)
 
   setConnectedGlobal = setConnected
   setAuthenticatedGlobal = setAuthenticated
@@ -41,7 +42,7 @@ function App() :JSX.Element {
   else if(authenticated && !launched){
     return (
       <>
-        <div className="flex flex-col justify-center min-h-screen place-items-center bg-slate-400"> launch<Button/> </div>
+        <div className="flex flex-col justify-center min-h-screen place-items-center bg-slate-400"><Button/> </div>
   
       </>
     )
