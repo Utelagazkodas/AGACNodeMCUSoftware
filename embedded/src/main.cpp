@@ -6,8 +6,8 @@
 #include <string.h>
 
 // Replace with your network credentials
-const char *ssid = "HUAWEI-dr64";
-const char *password = "588Y293w";
+const char *ssid = "NOPE";
+const char *password = "NOPER";
 
 // WebSocket server details
 const char *websockets_server_host = "192.168.100.141";
