@@ -6,11 +6,11 @@
 #include <string.h>
 
 // Replace with your network credentials
-const char *ssid = "NOPE";
-const char *password = "NOPER";
+const char *ssid = "Pixel 6a";
+const char *password = "nemTudom";
 
 // WebSocket server details
-const char *websockets_server_host = "192.168.100.141";
+const char *websockets_server_host = "192.168.208.229";
 const uint16_t websockets_server_port = 443; // Make sure your server is listening on this port
 const char *websockets_server_path = "/";    // WebSocket path if needed
 
@@ -27,10 +27,12 @@ int GCK_pin = D0;
 int DATA_pin = D2;
 
 int Ignite_pin = D1;
-
-int Thermo_pin = A0;
 // 0 if not launched
 unsigned long launched = 0;
+
+
+const int loadcellOffset = 87983;
+const int loadcellDivider = 23064;
 
 // Callback function to handle WebSocket events
 void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
@@ -68,7 +70,6 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
 
 void setup()
 {
-    pinMode(Thermo_pin, INPUT);
 
     pinMode(Ignite_pin, OUTPUT);
     digitalWrite(Ignite_pin, LOW);
@@ -116,12 +117,12 @@ void loop()
     webSocket.loop();
 
     
-    if (millis() - lastSend > 700 && launched != 0)
+    if (millis() - lastSend > 200 && launched != 0)
     {
         lastSend = millis();
         
         char buffer[128];
-        sprintf(buffer, "{\"entries\" : [{\"table\" : \"force\", \"value\" : %ld}, {\"table\" : \"timestamp\", \"value\" : %ld}, {\"table\" : \"temperature\", \"value\" : %ld}]}", scale.read(), millis() - launched, 0);
+        sprintf(buffer, "{\"entries\" : [{\"table\" : \"force\", \"value\" : %f}, {\"table\" : \"timestamp\", \"value\" : %ld}]}", (scale.read() + loadcellOffset) / (float)loadcellDivider, millis() - launched);
         
         webSocket.sendTXT(buffer);
     }
