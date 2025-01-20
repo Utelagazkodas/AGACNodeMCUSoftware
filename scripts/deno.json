@@ -1,7 +1,7 @@
 {
   "tasks": {
     "dev": "deno run --watch -A impulse.ts ",
-    "run": "deno run --allow-env --allow-read --allow-ffi --allow-net main.ts "
+    "run": "deno run --allow-env --allow-read impulse.ts "
   },
   "imports": {
 
