@@ -56,22 +56,23 @@ let impulse : number = 0
 let velocity : number = 0
 
 
-const WEIGHT = 1 // WEIGHT IN KG WITHOUT THE ROCKET MOTOR
+const WEIGHT = 0.2 // WEIGHT IN KG WITHOUT THE ROCKET MOTOR
 const RADIUS = 0.01 // RADIUS IN METERS
 const DRAGCOEFFICENT = 0.75 // DRAG COEFFICENT OF ROCKET
 
 
-
+console.log(forces)
 
 const crossSection = RADIUS * RADIUS * Math.PI 
 
 let mass = WEIGHT + before / GRAVITY
 let height = 0
-
+let timetopeak = 0
 
 while(i < forces.length-1){
     //change in impulse
     let time = (timestamps[i +1] - timestamps[i]) / 1000
+    timetopeak += time
 
     let tImpulse = trapezoid(forces[i] - (d * i), forces[i+1] - (d * (i + 1)), time)
 
@@ -85,7 +86,7 @@ while(i < forces.length-1){
     let AvgMass = (mass + (mass - d/GRAVITY))/2 
     let tVelocity = velocity
     let drag = 0.5 * AIRDENSITY * velocity * tVelocity* crossSection * DRAGCOEFFICENT
-    velocity += (tImpulse / AvgMass) - (time * (drag / AvgMass)) 
+    velocity += (tImpulse / AvgMass) - (time * (drag / AvgMass))
 
     height += ((velocity + tVelocity ) / 2) * time
 
@@ -95,6 +96,17 @@ while(i < forces.length-1){
 // make mass final
 mass -= d/GRAVITY
 
-const peak = 0.5*(velocity/GRAVITY)*(velocity/GRAVITY)*GRAVITY + height
+console.log("Height:", height, "Velocity:", velocity);
 
-console.log(peak)
+// Apex loop
+const STEP = 0.01;
+
+while (velocity > 0) {
+  const drag =
+    0.5 * AIRDENSITY * velocity * velocity * crossSection * DRAGCOEFFICENT;
+
+  velocity -= STEP * (GRAVITY + drag / mass);
+  height += velocity * STEP;
+}
+
+console.log("Final height at apex:", height);
