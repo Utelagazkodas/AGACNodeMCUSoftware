@@ -87,21 +87,15 @@ while (i < forces.length - 1) {
     time
   )
 
-  // add impulse to sum
+
   impulse += tImpulse
 
-  // remove mass from rocket mass
+  const drag = 0.5 * AIRDENSITY * velocity * velocity * crossSection * DRAGCOEFFICENT
+
+  velocity += -(GRAVITY * time) + (tImpulse / mass) - ((drag / mass)* time)
+
+
   mass -= d / GRAVITY
-
-  // add to velocity
-  const tVelocity = velocity
-  const AvgMass = (mass + (mass - d / GRAVITY)) / 2
-  const drag =
-    0.5 * AIRDENSITY * velocity * tVelocity * crossSection * DRAGCOEFFICENT
-  velocity += tImpulse / AvgMass - time * (drag / AvgMass)
-
-  height += ((velocity + tVelocity) / 2) * time
-
   // iterate
   i++
 }
